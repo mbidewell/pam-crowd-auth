@@ -101,6 +101,7 @@ static int _crowd_auth(const char *user, const char *pwd, pam_handle_t *pamh)
 		char *auth_url = NULL;
 		char *pwd_payload = NULL;
 
+		read_configuration(crowd_base_url, crowd_application, crowd_password);
 		auth_url = malloc(strlen(crowd_base_url) + strlen(CROWD_AUTH_URL) + strlen(user) + 1);
 		pwd_payload = malloc(strlen(CROWD_AUTH_BODY) + strlen(pwd) + 1);
 		
@@ -119,7 +120,7 @@ static int _crowd_auth(const char *user, const char *pwd, pam_handle_t *pamh)
 		pam_syslog(pamh, LOG_INFO, auth_url);
 		
 		res = curl_easy_perform(curl);
-		sprintf(msg_buf, "Error Code: %d", res);
+		sprintf(msg_buf, "CURL Error Code: %d", res);
 		pam_syslog(pamh, LOG_INFO, msg_buf);
 		if (res == CURLE_OK)
 		{
