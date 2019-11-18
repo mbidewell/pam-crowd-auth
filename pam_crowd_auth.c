@@ -58,6 +58,7 @@
 #include <curl/curl.h>
 
 #include "pam_crowd_auth.h"
+#include "utils.h"
 
 /*
  * PAM framework looks for these entry-points to pass control to the
@@ -74,7 +75,7 @@
  *      onto a normal UNIX authentication
  */
 
-size_t write_data(void *buffer, size_t size, size_t nmemb, void *userp)
+static size_t _curl_payload_handler(void *buffer, size_t size, size_t nmemb, void *userp)
 {
    return size * nmemb;
 }
@@ -93,27 +94,33 @@ static int _crowd_auth(const char *user, const char *pwd, pam_handle_t *pamh)
 	curl = curl_easy_init();
 	if (curl)
 	{
+		char crowd_base_url[100];
+		char crowd_application[30];
+		char crowd_password[30];
 		struct curl_slist *hs = NULL;
 		char *auth_url = NULL;
 		char *pwd_payload = NULL;
-		auth_url = malloc(strlen(CROWD_AUTH_URL) + strlen(user) + 1);
+
+		read_configuration(crowd_base_url, crowd_application, crowd_password);
+		auth_url = malloc(strlen(crowd_base_url) + strlen(CROWD_AUTH_URL) + strlen(user) + 1);
 		pwd_payload = malloc(strlen(CROWD_AUTH_BODY) + strlen(pwd) + 1);
+		
 		hs = curl_slist_append(hs, "Content-Type: application/json");
 
-		sprintf(auth_url, CROWD_AUTH_URL, user);
+		sprintf(auth_url, CROWD_AUTH_URL, crowd_base_url, user);
 		sprintf(pwd_payload, CROWD_AUTH_BODY, pwd);
 
 		curl_easy_setopt(curl, CURLOPT_HTTPHEADER, hs);
-		curl_easy_setopt(curl, CURLOPT_USERNAME, "<crowd_application>");
-		curl_easy_setopt(curl, CURLOPT_PASSWORD, "<crowd_application_password>");
+		curl_easy_setopt(curl, CURLOPT_USERNAME, crowd_application);
+		curl_easy_setopt(curl, CURLOPT_PASSWORD, crowd_password);
 		curl_easy_setopt(curl, CURLOPT_URL, auth_url);
 		curl_easy_setopt(curl, CURLOPT_POSTFIELDS, pwd_payload);
-		curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_data);
+		curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, _curl_payload_handler);
 
 		pam_syslog(pamh, LOG_INFO, auth_url);
 		
 		res = curl_easy_perform(curl);
-		sprintf(msg_buf, "Error Code: %d", res);
+		sprintf(msg_buf, "CURL Error Code: %d", res);
 		pam_syslog(pamh, LOG_INFO, msg_buf);
 		if (res == CURLE_OK)
 		{
