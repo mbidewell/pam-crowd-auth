@@ -94,28 +94,40 @@ static int _crowd_auth(const char *user, const char *pwd, pam_handle_t *pamh)
 	curl = curl_easy_init();
 	if (curl)
 	{
-		char crowd_base_url[100];
-		char crowd_application[30];
-		char crowd_password[30];
+		struct crowd_config conf;
 		struct curl_slist *hs = NULL;
 		char *auth_url = NULL;
 		char *pwd_payload = NULL;
 
-		read_configuration(crowd_base_url, crowd_application, crowd_password);
-		auth_url = malloc(strlen(crowd_base_url) + strlen(CROWD_AUTH_URL) + strlen(user) + 1);
+		read_configuration(&conf);
+		auth_url = malloc(strlen(conf.base_url) + strlen(CROWD_AUTH_URL) + strlen(user) + 1);
 		pwd_payload = malloc(strlen(CROWD_AUTH_BODY) + strlen(pwd) + 1);
 		
 		hs = curl_slist_append(hs, "Content-Type: application/json");
 
-		sprintf(auth_url, CROWD_AUTH_URL, crowd_base_url, user);
+		sprintf(auth_url, CROWD_AUTH_URL, conf.base_url, user);
 		sprintf(pwd_payload, CROWD_AUTH_BODY, pwd);
 
 		curl_easy_setopt(curl, CURLOPT_HTTPHEADER, hs);
-		curl_easy_setopt(curl, CURLOPT_USERNAME, crowd_application);
-		curl_easy_setopt(curl, CURLOPT_PASSWORD, crowd_password);
+		curl_easy_setopt(curl, CURLOPT_USERNAME, conf.application);
+		curl_easy_setopt(curl, CURLOPT_PASSWORD, conf.password);
 		curl_easy_setopt(curl, CURLOPT_URL, auth_url);
 		curl_easy_setopt(curl, CURLOPT_POSTFIELDS, pwd_payload);
 		curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, _curl_payload_handler);
+
+		if(conf.client_cert[0] = '\0')
+		{
+			curl_easy_setopt(curl, CURLOPT_SSLCERTTYPE, "PEM");
+			curl_easy_setopt(curl, CURLOPT_SSLCERT, conf.client_cert);
+		}
+		if(conf.client_cert_key[0] = '\0')
+		{
+			curl_easy_setopt(curl, CURLOPT_SSLKEY, conf.client_cert_key);
+		}
+		if(conf.client_cert_pwd[0] = '\0')
+		{
+			curl_easy_setopt(curl, CURLOPT_KEYPASSWD, conf.client_cert_pwd);
+		}
 
 		pam_syslog(pamh, LOG_INFO, auth_url);
 		
