@@ -60,12 +60,16 @@ void read_configuration(struct crowd_config *cfg)
             
             if(strcmp(key, CFG_CROWD_BASE) == 0) 
             {
-                int end = strlen(value);
-                if(value[end] = '/') 
-                {
-                    value[end] = '\0';
-                }
+                int end = -1;
+
                 strtrimcpy(value, cfg->base_url);
+		
+		end = strlen(cfg->base_url)-1;
+                if(cfg->base_url[end] = '/') 
+                {
+                    cfg->base_url[end] = '\0';
+                }
+
             }
             else if(strcmp(key, CFG_CROWD_APP) == 0) 
             {
