@@ -115,16 +115,16 @@ static int _crowd_auth(const char *user, const char *pwd, pam_handle_t *pamh)
 		curl_easy_setopt(curl, CURLOPT_POSTFIELDS, pwd_payload);
 		curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, _curl_payload_handler);
 
-		if(conf.client_cert[0] = '\0')
+		if(conf.client_cert[0] != '\0')
 		{
-			curl_easy_setopt(curl, CURLOPT_SSLCERTTYPE, "PEM");
+			curl_easy_setopt(curl, CURLOPT_SSLCERTTYPE, conf.client_cert_type);
 			curl_easy_setopt(curl, CURLOPT_SSLCERT, conf.client_cert);
 		}
-		if(conf.client_cert_key[0] = '\0')
+		if(conf.client_cert_key[0] != '\0')
 		{
 			curl_easy_setopt(curl, CURLOPT_SSLKEY, conf.client_cert_key);
 		}
-		if(conf.client_cert_pwd[0] = '\0')
+		if(conf.client_cert_pwd[0] != '\0')
 		{
 			curl_easy_setopt(curl, CURLOPT_KEYPASSWD, conf.client_cert_pwd);
 		}
