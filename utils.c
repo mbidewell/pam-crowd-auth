@@ -42,10 +42,7 @@ void read_configuration(struct crowd_config *cfg)
     char buffer[1024];
     FILE* fp = fopen(CFG_FILE, "r");
 
-    cfg->client_cert[0] = '\0';
-    cfg->client_cert_key[0] = '\0';
-    cfg->client_cert_pwd[0] = '\0';
-
+    memset(cfg, '\0', sizeof(struct crowd_config));    
     strcpy(cfg->client_cert_type, "PEM");
 
     while(fgets(buffer, 1024, fp) != NULL) 
@@ -65,7 +62,7 @@ void read_configuration(struct crowd_config *cfg)
                 strtrimcpy(value, cfg->base_url);
 		
 		end = strlen(cfg->base_url)-1;
-                if(cfg->base_url[end] = '/') 
+                if(cfg->base_url[end] == '/') 
                 {
                     cfg->base_url[end] = '\0';
                 }
