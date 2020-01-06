@@ -7,7 +7,7 @@ LIBS=-lcurl -lpam
 .DEFAULT_GOAL := pam_crowd_auth.so
 
 %o : %c
-	$(CC) -o lib/$@ $< $(CFLAGS)
+	$(CC) -o $@ $< $(CFLAGS)
 
 %.so: $(OBJ)
 	ld -x --shared -o $@ $(OBJ) $(LIBS)
