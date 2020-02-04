@@ -1,6 +1,8 @@
 #ifndef UTILS_H
 #define UTILS_H
 
+#include <jansson.h>
+
 #define CFG_CROWD_BASE "crowd_base_url"
 #define CFG_CROWD_APP "crowd_app"
 #define CFG_CROWD_PWD "crowd_pwd"
@@ -23,5 +25,6 @@ struct crowd_config
 
 char* strtrimcpy(char *src, char *dest);
 void read_configuration(struct crowd_config *cfg);
+json_t* get_auth_body(const char* pwd);
 
 #endif

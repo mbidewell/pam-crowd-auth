@@ -2,7 +2,7 @@ CC=gcc
 CFLAGS=-fPIC -fno-stack-protector -c
 OBJ=pam_crowd_auth.o utils.o
 
-LIBS=-lcurl -lpam
+LIBS=-lcurl -lpam -ljansson
 
 .DEFAULT_GOAL := pam_crowd_auth.so
 

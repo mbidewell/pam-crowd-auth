@@ -95,3 +95,23 @@ void read_configuration(struct crowd_config *cfg)
         }
     }
 }
+
+json_t* get_auth_body(const char* pwd) 
+{
+    json_t* body = json_object();
+    
+    if(body != NULL) 
+    {
+        json_t* j_pwd  = json_string(pwd);
+        if(j_pwd != NULL)
+        {
+           int errno = json_object_set_new(body, "value", j_pwd);
+           if(errno != 0) 
+           {
+               json_decref(body);
+               return NULL;
+           }
+	}
+    }
+    return body;
+} 

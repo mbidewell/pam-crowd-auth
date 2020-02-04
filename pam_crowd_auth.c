@@ -101,12 +101,18 @@ static int _crowd_auth(const char *user, const char *pwd, pam_handle_t *pamh)
 
 		read_configuration(&conf);
 		auth_url = malloc(strlen(conf.base_url) + strlen(CROWD_AUTH_URL) + strlen(user) + 1);
-		pwd_payload = malloc(strlen(CROWD_AUTH_BODY) + strlen(pwd) + 1);
 		
 		hs = curl_slist_append(hs, "Content-Type: application/json");
 
 		sprintf(auth_url, CROWD_AUTH_URL, conf.base_url, user);
-		sprintf(pwd_payload, CROWD_AUTH_BODY, pwd);
+		json_t* j_pwd = get_auth_body(pwd);
+		if(j_pwd == NULL) 
+		{
+			curl_easy_cleanup(curl);
+			free(auth_url);
+		}
+		
+		pwd_payload = json_dumps(j_pwd, 0);
 
 		curl_easy_setopt(curl, CURLOPT_HTTPHEADER, hs);
 		curl_easy_setopt(curl, CURLOPT_USERNAME, conf.application);
@@ -147,7 +153,8 @@ static int _crowd_auth(const char *user, const char *pwd, pam_handle_t *pamh)
 			}
 		}
 		curl_easy_cleanup(curl);
-
+        json_decref(j_pwd);
+        
 		free(auth_url);
 		free(pwd_payload);
 	}
