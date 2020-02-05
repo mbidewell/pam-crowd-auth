@@ -108,11 +108,15 @@ static int _crowd_auth(const char *user, const char *pwd, pam_handle_t *pamh)
 		json_t* j_pwd = get_auth_body(pwd);
 		if(j_pwd == NULL) 
 		{
+			pam_syslog(pamh, LOG_WARNING, "Invalid Password");
 			curl_easy_cleanup(curl);
 			free(auth_url);
 		}
 		
 		pwd_payload = json_dumps(j_pwd, 0);
+
+		sprintf(msg_buf, "Input password length:  %d", strlen(pwd_payload));
+		pam_syslog(pamh, LOG_INFO, msg_buf);
 
 		curl_easy_setopt(curl, CURLOPT_HTTPHEADER, hs);
 		curl_easy_setopt(curl, CURLOPT_USERNAME, conf.application);
